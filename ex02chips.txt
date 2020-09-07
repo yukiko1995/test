@@ -1,0 +1,127 @@
+dd bs=大きさ　count=1 if=/dev/zero of=ファイル名
+
+パーミッション
+--- 0
+--x 1 ファイルの実行権限が与えられ実行可能となる
+-w- 2 書き込み許可
+r-- 4 読み込み許可
+パーミッションの意味等
+https://qiita.com/shisama/items/5f4c4fa768642aad9e06
+https://eng-entrance.com/linux-permission-basic#4
+
+- ファイルの種別
+r--　ファイルの所有者に対する権限　４
+r-x　ファイルの所有グループに対する権限　５
+r-x　その他に対する権限　５
+1　　ハードリンクの数
+
+ハードリンクはlnコマンド
+ln test3 test5
+
+シンボリックリンクはln -s コマンド
+ln -s test0 test6
+
+ハードリンクとシンボリックリンクについて
+https://qiita.com/lnznt/items/6178e1c5f066f22fe9c2
+
+ハードリンクもシンボリックリンクも一つ目は実在、二つ目は非実在
+（2つ目が実在している場合FileExistsエラーがでる）
+http://www.office-matsunaga.biz/linuxcommand/description.php?id=5
+
+inode番号を共通化させるのがハードリンク
+inode番号はファイルシステム単位でユニークになる。
+ここでいうファイルシステムは一口に言ってマウントされる単位（dfで表示される一行）
+そのため、ハードリンクはファイルシステムを越えて作成することはできない。
+対して、シンボリックリンクは「ファイルパス」でリンク先情報を持っているので、このような制約はない。
+
+ディレクトリ
+d ファイルの種別
+ls -lid でディレクトリ自身の情報の表示
+ディレクトリは元の（親）ディレクトリにある名前と
+自分自身にある「.」の２つの名前を持っているので、作成時のリンク数が２になる。
+ディレクトリの作成コマンド
+https://eng-entrance.com/linux-command-mkdir#mkdir
+
+シンボリックリンク
+ｌ　シンボリックリンク　リンク先を->で表現してくれる。　test0がリンク先
+
+日付変更
+ディレクトリとファイル
+https://linux.keicode.com/commands/touch.php
+シンボリックリンクの場合特殊な日付変更　touch -h -t #### file
+https://qastack.jp/unix/63876/changing-the-timestamp-of-a-symlink
+
+ファイルの実体は内部的には番号で管理されている。
+この対応を一覧で保持するのがディレクトリであり、
+個々の対応付けのことをハードリンクという。
+
+ls -l
+toralXX
+
+
+
+【test0】mkdir -m 715 test0
+chmod 715 test0(勝手に755に変わるため）
+touch -t 202001012047 test0
+d
+rwx 7
+--x 1
+r-x 5
+2
+XX（大きさ）
+【test1】dd bs=4 count=1 if=/dev/zero of=test1
+chmod 714 test1
+touch -t 202001012146  test1
+-
+rwx 7
+--x 1
+r-- 4
+1
+4（大きさ）
+【test2】mkdir -m 504 test2
+touch -t 202001012245 test2
+d
+r-x 5
+--- 0
+r-- 4
+2
+XX
+【test3】dd bs=1 count=1 if=/dev/zero of=test3
+chmod 404 test3
+touch -t 202001012344 test3
+-
+r-- 4
+--- 0
+r-- 4
+2
+１（大きさ）
+【test4】dd bs=2 count=1 if=/dev/zero of=test4
+chmod 641 test4
+touch -t 202001012343 test4
+-
+rw- 6
+r-- 4
+--x 1
+1
+２（大きさ）
+【test5】ln test3 test5
+chmod 404 test5
+touch -t 202001012344 test5
+-
+r-- 4
+--- 0
+r-- 4
+2
+１（大きさ）
+【test6】ln -s test0 test6
+chmod 755 test6
+touch -h -t 202001012220 test6
+(デフォルトが大きさ５）
+
+
+l
+rwx 7
+r-x 5
+r-x 5
+1
+５（大きさ）
